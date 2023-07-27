@@ -1,11 +1,21 @@
 #include <windows.h>
-
-// The purpose of this program is just to show the basics of a custom launcher that people can make in SA-MP.
-
 #include <iostream>
 
-// entry point
-int main(int argc, char* argv[])
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		// Code to run when the DLL is loaded.
+		break;
+	case DLL_PROCESS_DETACH:
+		// Code to run when the DLL is unloaded.
+		break;
+	}
+	return TRUE;
+}
+
+extern "C" __declspec(dllexport) int launchSAMP(const char* ip, int port, const char* name)
 {
 	// Prepare to create a new process.
 	PROCESS_INFORMATION ProcessInfo;
@@ -14,22 +24,9 @@ int main(int argc, char* argv[])
 	memset(&ProcessInfo, 0, sizeof(PROCESS_INFORMATION));
 	memset(&StartupInfo, 0, sizeof(STARTUPINFO));
 
-	// Tell the user to enter an IP.
-	std::cout << "Please enter the IP you would like to connect to.\n";
-
-	// Get the IP.
-	char ip[24];
-	std::cin >> ip;
-
-	// Tell the user to enter a port
-	std::cout << "Please enter the port.\n";
-
-	// Get the port they typed.
-	int port;
-	std::cin >> port;
 
 	// Get the user's gta_sa location
-	char exeLocation[256], name[24];
+	char exeLocation[256];
 	DWORD buffer = sizeof(exeLocation);
 
 	// Open registry key
@@ -63,12 +60,6 @@ int main(int argc, char* argv[])
 	RegCloseKey(hKey);
 
 	char commandLine[128];
-	if (dwRet != ERROR_SUCCESS)
-	{
-		// Since a name couldn't be found, ask for one.
-		std::cout << "Enter a name";
-		std::cin >> name;
-	}
 
 	// Construct it all in one command line string.
 	sprintf_s(commandLine, sizeof(commandLine), "-c -h %s -p %d -n %s", ip, port, name);
